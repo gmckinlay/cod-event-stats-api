@@ -8,14 +8,15 @@
 $ git clone https://github.com/gmckinlay/cod-event-stats-api.git
 $ cd cod-event-stats-api
 ```
+2. Copy .env.template to .env and set a valid CoD API username and password in the file. The .env file is included in the .gitignore and should never be commited.
 
-2. Install dependencies
+3. Install dependencies
 
 ```bash
 $ yarn
 ```
 
-3. Launch the dev mode
+4. Launch the dev mode
 
 ```bash
 $ yarn dev
