@@ -13,7 +13,6 @@ export class Team {
     addPlayer(uno:string): Player {
         const player: Player = new Player(uno);
         this.players.push(player);
-        this.players.sort(Player.compare);
         return player;
     }   
     

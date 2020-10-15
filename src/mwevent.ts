@@ -9,7 +9,6 @@ export class MWEvent {
     public addTeam(name: string): Team{
         const team: Team = new Team(name);
         this.teams.push(team);
-        this.teams.sort(Team.compare);
         return team;
     }    
 }

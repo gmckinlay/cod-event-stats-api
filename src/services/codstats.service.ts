@@ -37,7 +37,14 @@ export class CodStatsService {
 		event.date = e.date;		
         this._events.push(event);
         
-        return Promise.all(e.teams.flatMap(team => team.players.map(p => event.addTeam(team.name).addPlayer(p.uno).init(event.date, this.callOfDutyAPI)))).then(()=> event);
+        return Promise.all(e.teams.flatMap((t)=>{
+            const team: Team = event.addTeam(t.name);
+            return t.players.map(p => team.addPlayer(p.uno).init(event.date, this.callOfDutyAPI));
+        })).then(() => {
+            event.teams.sort(Team.compare);
+            event.teams.forEach((team)=>team.players.sort(Player.compare));
+            return event;
+        });        
     }
 
     public getMatch(id: string){
