@@ -9,6 +9,7 @@ export class Team {
 
     players: Player[] = [];
     matches: Match[] = [];
+    score: number = 0;
 
     constructor(public name: string){}
 
@@ -20,20 +21,22 @@ export class Team {
     
     updateMatches() {
         if(this.players.length && this.players[0].wzMatches.length) {
-            this.players[0].wzMatches.forEach((match) => {
+            this.players[0].wzMatches.reverse().forEach((match) => {
 
                 const stats = this.players.flatMap((p)=> p.wzMatches.filter(m=>m.matchID===match.matchID)).map(m=>m.playerStats);
                 const matchKills = stats.map(s => s.kills).reduce((a,b) => a + b, 0);
                 const matchDeaths = stats.map(s => s.deaths).reduce((a,b) => a + b, 0);
 
-                this.matches.push(new Match(match.matchID,
-                    match.utcStartSeconds,
-                    match.mode,
-                    match.player.team,
-                    match.playerStats.teamPlacement,
-                    matchKills,
-                    matchDeaths
-                    ));
+                if(this.players[0].wzMatches.length <= 4 || this.matches.length < 4 && stats.every(stat => !(stat.timePlayed < 630 && stat.deaths < 2))){
+                    this.matches.push(new Match(match.matchID,
+                        match.utcStartSeconds,
+                        match.mode,
+                        match.player.team,
+                        match.playerStats.teamPlacement,
+                        matchKills,
+                        matchDeaths
+                        ));
+                }
             });
         }
     }
