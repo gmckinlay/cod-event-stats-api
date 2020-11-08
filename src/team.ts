@@ -1,12 +1,14 @@
 import { API } from "@stagg/callofduty";
 import { platform } from "os";
 import { Player } from "./player";
+import { Match } from "./match"
 
 export class Team {
     private static WIN_MULTI = 300;
     private static KILL_MULTI = 10;
 
     players: Player[] = [];
+    matches: Match[] = [];
 
     constructor(public name: string){}
 
@@ -16,6 +18,26 @@ export class Team {
         return player;
     }   
     
+    updateMatches() {
+        if(this.players.length && this.players[0].wzMatches.length) {
+            this.players[0].wzMatches.forEach((match) => {
+
+                const stats = this.players.flatMap((p)=> p.wzMatches.filter(m=>m.matchID===match.matchID)).map(m=>m.playerStats);
+                const matchKills = stats.map(s => s.kills).reduce((a,b) => a + b, 0);
+                const matchDeaths = stats.map(s => s.deaths).reduce((a,b) => a + b, 0);
+
+                this.matches.push(new Match(match.matchID,
+                    match.utcStartSeconds,
+                    match.mode,
+                    match.player.team,
+                    match.playerStats.teamPlacement,
+                    matchKills,
+                    matchDeaths
+                    ));
+            });
+        }
+    }
+
     getScrore(): number {
         const wins = Math.max.apply(Math, this.players.map(o => o.totalWins));
         const kills = this.players.map(p=>p.totalKills).reduce((a,b) => a + b, 0);

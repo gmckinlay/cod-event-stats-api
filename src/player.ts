@@ -1,5 +1,6 @@
 import { API } from "@stagg/callofduty";
 import { WZ } from "@stagg/callofduty/lib/schema/api/mw";
+import {Team} from "./team";
 
 export class Player {
 
@@ -11,20 +12,12 @@ export class Player {
     totalWins: number = 0;
     matches: number = 0;
     kd: number = 0;
-    matchIds: string[] = [];
+    wzMatches: WZ.Match[] = [];
 
     constructor(public uno:string){    }
 
-    init(date: number, api: API) {
-        
-        this.totalKills = 0;
-        this.totalDeaths = 0;
-        this.totalDmg = 0;
-        this.totalDmgTkn = 0;
-        this.bestPosition = 150;
-        this.totalWins = 0;
-        this.matches = 0;
-        this.matchIds = [];
+    init(date: number, api: API) {                
+        this.wzMatches = [];
 
         const startDate = new Date(date);
         const endDate = new Date(date + (4 * 60 * 60 * 1000));
@@ -32,25 +25,47 @@ export class Player {
             .then(matchList => {
                 matchList.matches.filter(element => {			
                     return element.gameType==='wz' && element.utcStartSeconds > startDate.getTime()/1000;
-                }).forEach(element => {
-                    this.totalKills += element.playerStats.kills;
-                    this.totalDeaths += element.playerStats.deaths;
-                    this.totalDmg += element.playerStats.damageDone;
-                    this.totalDmgTkn += element.playerStats.damageTaken;
-                    this.matches ++;
-                    this.kd = Math.round(((this.totalKills / this.totalDeaths) +  Number.EPSILON) * 100) / 100;
-                    this.matchIds.push(element.matchID);
-        
-                    let stats: WZ.Match.PlayerStats = <WZ.Match.PlayerStats>element.playerStats;
-                    if(stats.teamPlacement < this.bestPosition){
-                        this.bestPosition = stats.teamPlacement;
-                    }
-        
-                    if(stats.teamPlacement === 1){
-                        this.totalWins++;
-                    }			
+                }).forEach(element => {                    
+                    this.wzMatches.push(<WZ.Match>element);                    
                 });
             });        
+    }
+
+    updateStats(team: Team) {
+        this.totalKills = 0;
+        this.totalDeaths = 0;
+        this.totalDmg = 0;
+        this.totalDmgTkn = 0;
+        this.bestPosition = 150;
+        this.totalWins = 0;
+        this.matches = 0;
+
+        this.wzMatches = this.wzMatches
+            .filter((match) => {
+                const playersMatches =  team.players.map((p)=>p.wzMatches);                
+                return playersMatches.every((playerMatches)=> {
+                    const matchIds = playerMatches.map((playerMatch)=>playerMatch.matchID);
+                    return matchIds.includes(match.matchID);                   
+                });
+            });
+            
+        this.wzMatches.forEach((match) => {            
+            this.totalKills += match.playerStats.kills;
+            this.totalDeaths += match.playerStats.deaths;
+            this.totalDmg += match.playerStats.damageDone;
+            this.totalDmgTkn += match.playerStats.damageTaken;
+            this.matches ++;
+            this.kd = Math.round(((this.totalKills / this.totalDeaths) +  Number.EPSILON) * 100) / 100;
+
+            let stats: WZ.Match.PlayerStats = <WZ.Match.PlayerStats>match.playerStats;
+            if(stats.teamPlacement < this.bestPosition){
+                this.bestPosition = stats.teamPlacement;
+            }
+
+            if(stats.teamPlacement === 1){
+                this.totalWins++;
+            }
+        });
     }
 
     toString(): string {
