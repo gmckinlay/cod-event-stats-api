@@ -9,5 +9,7 @@ export class Match {
         public team: string,
         public position: number,
         public totalKills: number,
-        public totalDeaths:number){}
+        public totalDeaths:number,
+        public score: number,
+        public kd: number){}
 }

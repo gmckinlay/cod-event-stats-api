@@ -43,14 +43,7 @@ export class CodStatsService {
             const team: Team = event.addTeam(t.name);
             return t.players.map(p => team.addPlayer(p.uno).init(event.date, this.callOfDutyAPI));
         })).then(() => { 
-            event.teams.forEach((team)=>
-            {
-                team.players.forEach(p => p.updateStats(team));
-                team.players.sort(Player.compare);
-                team.updateMatches();
-            });       
-            event.teams.sort(Team.compare);
-            
+            event.updateScores();               
             return event;
         });        
     }
@@ -61,14 +54,8 @@ export class CodStatsService {
             this.events
             .filter((e)=> currentTime > e.date && currentTime < new Date(e.date + (5 * 60 * 60 * 1000)).getTime())
             .forEach((e)=>{
-                Promise.all(e.teams.flatMap((t)=>t.players).map((p)=>p.init(e.date, this.callOfDutyAPI))).then(()=>{
-                    e.teams.forEach((team)=>
-                        {
-                            team.players.forEach(p => p.updateStats(team));
-                            team.players.sort(Player.compare);
-                            team.updateMatches();
-                        });       
-                    e.teams.sort(Team.compare);                    
+                Promise.all(e.teams.flatMap((t)=>t.players).map((p)=>p.init(e.date, this.callOfDutyAPI))).then(()=>{                        
+                    e.updateScores();                                   
                 });
             });
         });
