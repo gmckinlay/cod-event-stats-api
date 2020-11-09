@@ -31,7 +31,7 @@ export class Player {
             });        
     }
 
-    updateStats(team: Team) {
+    updateStats() {
         this.totalKills = 0;
         this.totalDeaths = 0;
         this.totalDmg = 0;
@@ -39,15 +39,6 @@ export class Player {
         this.bestPosition = 150;
         this.totalWins = 0;
         this.matches = 0;
-
-        this.wzMatches = this.wzMatches
-            .filter((match) => {
-                const playersMatches =  team.players.map((p)=>p.wzMatches);                
-                return playersMatches.every((playerMatches)=> {
-                    const matchIds = playerMatches.map((playerMatch)=>playerMatch.matchID);
-                    return matchIds.includes(match.matchID);                   
-                });
-            });
             
         this.wzMatches.forEach((match) => {            
             this.totalKills += match.playerStats.kills;
